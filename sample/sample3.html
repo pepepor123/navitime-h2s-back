@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sample</title>
+  <!-- import jQuery -->
+  <script src='http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+  <!-- import Axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+       https://firebase.google.com/docs/web/setup#available-libraries -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-analytics.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhfu4HWRrv555vjbPeNcK6xC4MVhiw9K8",
+      authDomain: "navi-test000.firebaseapp.com",
+      databaseURL: "https://navi-test000.firebaseio.com",
+      projectId: "navi-test000",
+      storageBucket: "navi-test000.appspot.com",
+      messagingSenderId: "447844480898",
+      appId: "1:447844480898:web:03faae0a468c92fb51c19b",
+      measurementId: "G-WKYW19730K"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+
+    const database = firebase.database();
+  </script>
+
+  <h1>Firebase Sample</h1>
+  <p>ナビタイムのAPIと組み合わせるサンプル</p>
+
+  <h2>集合場所を設定</h2>
+  <input type="text" name="dstWord">
+  <button id="dstSearchBtn">検索</button>
+  <div id="dstCandidates">
+    <p>集合場所を検索してください</p>
+  </div>
+  <button id="setDstBtn">決定</button>
+
+  <h2>集合時間を設定</h2>
+  <p>いまは固定 (2020-09-04 09:00:00)</p>
+  <button id=setMtgTimeBtn>決定</button>
+
+  <h2>出発地点を設定</h2>
+  <input type="text" name="srcWord">
+  <button id="srcSearchBtn">検索</button>
+  <div id="srcCandidates">
+    <p>出発地点を検索してください</p>
+  </div>
+  <button id="setSrcBtn">決定</button>
+
+  <h2>ルート検索</h2>
+  <button id="searchRouteBtn">ルート検索</button>
+  <div id="routeCandidates">
+    <p>ルートを検索してください</p>
+  </div>
+  <button id="setRouteBtn">ルート決定</button>
+
+  <script>
+    const baseUrl = 'https://api-service.instruction.cld.dev.navitime.co.jp/teama/v1';
+
+    let dstPlace = null;;
+    let srcPlace = null;
+    let meetingTime = null;
+
+    let dstPlaceCandidates = [];
+    let srcPlaceCandidates = [];
+    let routeCandidates = [];
+
+    const getCurrentTime = () => {
+      const now = new Date();
+      const Y = now.getFullYear();
+      const M = ('0' + (now.getMonth() + 1)).slice(-2);
+      const D = ('0' + now.getDate()).slice(-2);
+      const h = ('0' + now.getHours()).slice(-2);
+      const m = ('0' + now.getMinutes()).slice(-2);
+      const s = ('0' + now.getSeconds()).slice(-2);
+      return Y + '/' + M + '/' + D + '/' + h + ':' + m + ':' + s;
+    }
+
+    $('#dstSearchBtn').on('click', () => {
+      $('#dstCandidates').empty();
+      dstPlace = null;
+      dstPlaceCandidates.splice(0, dstPlaceCandidates.length);
+      const word = $('input[name="dstWord"]').val();
+      const url = baseUrl + '/spot?word=' + word;
+      console.log(url);
+
+      axios.get(url)
+      .then((res) => {
+        console.log('Success');
+        dstPlaceCandidates = [].concat(res.data.items);
+        Object.entries(dstPlaceCandidates).forEach(([idx, item]) => {
+          $('#dstCandidates').append('<p><input type="radio" name="dstPlace" value="' + idx + '">' + item['name'] + '</p>');
+        });
+      })
+      .catch((err) => {
+        console.log('Failure');
+        alert(err);
+      });
+    });
+
+    $('#setDstBtn').on('click', () => {
+      const choice = $('input:radio[name="dstPlace"]:checked').val();
+      console.log(dstPlaceCandidates[choice]);
+      dstPlace = dstPlaceCandidates[choice]['coord'];
+      console.log(dstPlace);
+    });
+
+    $('#srcSearchBtn').on('click', () => {
+      $('#srcCandidates').empty();
+      srcPlace = null;
+      srcPlaceCandidates.splice(0, srcPlaceCandidates.length);
+      const word = $('input[name="srcWord"]').val();
+      const url = baseUrl + '/spot?word=' + word;
+      console.log(url);
+
+      axios.get(url)
+      .then((res) => {
+        console.log('Success');
+        srcPlaceCandidates = [].concat(res.data.items);
+        Object.entries(srcPlaceCandidates).forEach(([idx, item]) => {
+          $('#srcCandidates').append('<p><input type="radio" name="srcPlace" value="' + idx + '">' + item['name'] + '</p>');
+        });
+      })
+      .catch((err) => {
+        console.log('Failure');
+        alert(err);
+      });
+    });
+
+    $('#setSrcBtn').on('click', () => {
+      const choice = $('input:radio[name="srcPlace"]:checked').val();
+      console.log(srcPlaceCandidates[choice]);
+      srcPlace = srcPlaceCandidates[choice]['coord'];
+      console.log(srcPlace);
+    });
+
+    $('#setMtgTimeBtn').on('click', () => {
+      meetingTime = '2020-09-04T09:00:00';
+      console.log('meetingTime: ' + meetingTime);
+    });
+
+    $('#searchRouteBtn').on('click', () => {
+      const url = baseUrl + '/route_transit' + '?start=' + srcPlace['lat'] + ',' + srcPlace['lon'] + '&goal=' + dstPlace['lat'] + ',' + dstPlace['lon'] + '&goal_time=' + meetingTime;
+      console.log(url);
+
+      axios.get(url)
+      .then((res) => {
+        console.log('Success');
+        console.log(res.data);
+        routeCandidates = [].concat(res.data.items);
+        Object.entries(routeCandidates).forEach(([idx, item]) => {
+          $('#routeCandidates').append('<p><input type="radio" name="routeChoice" value="' + idx + '">' + '候補' + idx + '</p>');
+        });
+      })
+      .catch((err) => {
+        console.log('Failure');
+        alert(err);
+      });
+    });
+
+    $('#setRouteBtn').on('click', () => {
+      const choice = $('input:radio[name="routeChoice"]:checked').val();
+      const route = routeCandidates[choice]
+      console.log(route);
+
+      const ref = database.ref('routes');
+      ref.push({
+        goal_place: dstPlace,
+        goal_time: meetingTime,
+        start_place: srcPlace,
+        route: route,
+        time: getCurrentTime()
+      });
+    });
+  </script>
+</body>
+</html>
