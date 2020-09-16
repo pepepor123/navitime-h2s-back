@@ -21,7 +21,7 @@
   <script>
     // Your web app's Firebase configuration
     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    var firebaseConfig = {
+    const firebaseConfig = {
       apiKey: "AIzaSyBhfu4HWRrv555vjbPeNcK6xC4MVhiw9K8",
       authDomain: "navi-test000.firebaseapp.com",
       databaseURL: "https://navi-test000.firebaseio.com",
@@ -41,12 +41,12 @@
       console.log('clicked!');
 
       const now = new Date();
-      var Y = now.getFullYear();
-      var M = ('0' + (now.getMonth() + 1)).slice(-2);
-      var D = ('0' + now.getDate()).slice(-2);
-      var h = ('0' + now.getHours()).slice(-2);
-      var m = ('0' + now.getMinutes()).slice(-2);
-      var s = ('0' + now.getSeconds()).slice(-2);
+      const Y = now.getFullYear();
+      const M = ('0' + (now.getMonth() + 1)).slice(-2);
+      const D = ('0' + now.getDate()).slice(-2);
+      const h = ('0' + now.getHours()).slice(-2);
+      const m = ('0' + now.getMinutes()).slice(-2);
+      const s = ('0' + now.getSeconds()).slice(-2);
 
       const ref = database.ref('comments');
       ref.push({
