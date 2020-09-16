@@ -38,7 +38,7 @@
     firebase.analytics();
 
     const database = firebase.database();
-    const baseUrl = 'https://api-service.instruction.cld.dev.navitime.co.jp/teama/v1/';
+    const baseUrl = 'https://api-service.instruction.cld.dev.navitime.co.jp/teama/v1';
 
     // const srcPlace = {lat: null, lon: null};
     // const dstPlace = {lat: null, lon: null};
@@ -77,11 +77,11 @@
     }
 
     const getRoute = () => {
-      const url = baseUrl + 'route_transit' + '?start=' + srcPlace + '&goal=' + dstPlace + '&goal_time=' + meetingTime;
+      const url = baseUrl + '/route_transit' + '?start=' + srcPlace + '&goal=' + dstPlace + '&goal_time=' + meetingTime;
       axios.get(url)
       .then((res) => {
         console.log('Success');
-        
+
         const route = res.data.items[0];
 
         const ref = database.ref('routes');
